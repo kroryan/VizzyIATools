@@ -3,6 +3,8 @@
 A Python tool for reading, writing, validating and building Vizzy programs
 for SimpleRockets 2 / Juno: New Origins, without opening the game editor.
 
+
+THE EXAMPLES ARE FROM: https://www.simplerockets.com/c/iM9KjM/Auto-Vizzy-USP-01-Universal-Space-Probe THEY HAVE BEEN MODIFY USING IA TOOLS 
 ---
 
 ## Requirements
