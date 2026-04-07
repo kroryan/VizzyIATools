@@ -297,7 +297,14 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-USERDATA     = Path(__file__).parent
+_HERE = Path(__file__).resolve().parent
+if (_HERE / "FlightPrograms").exists() and (_HERE / "CraftDesigns").exists():
+    USERDATA = _HERE
+elif (_HERE.parent / "FlightPrograms").exists() and (_HERE.parent / "CraftDesigns").exists():
+    USERDATA = _HERE.parent
+else:
+    USERDATA = _HERE
+
 PROGRAMS_DIR = USERDATA / "FlightPrograms"
 CRAFTS_DIR   = USERDATA / "CraftDesigns"
 
@@ -828,6 +835,7 @@ class VizzyProgram:
         self._variables: list = []
         self.root_instructions: list = []
         self._expressions: list = []
+        self._custom_instruction_threads: list = []
         self._thread_x = -10    # canvas X offset for current thread
         self._thread_y = -20    # canvas Y for next top-level block in thread
         self._thread_col_width = 400  # horizontal spacing between threads
@@ -1353,9 +1361,7 @@ class VizzyProgram:
         args_str   = " ".join(f"({i})" for i in range(len(params)))
         el.set("format",     f"{name} {params_str}  ")
         el.set("callFormat", f"{name} {args_str} ")
-        self._expressions.append(el)
-        for b in body_els:
-            self._expressions.append(b)
+        self._custom_instruction_threads.append([el, *body_els])
         return el
 
     # -- serialisation ---------------------------------------
@@ -1372,6 +1378,11 @@ class VizzyProgram:
         instr_el = ET.SubElement(prog, "Instructions")
         for b in self.root_instructions:
             instr_el.append(b)
+
+        for thread in self._custom_instruction_threads:
+            thread_el = ET.SubElement(prog, "Instructions")
+            for b in thread:
+                thread_el.append(b)
 
         expr_el = ET.SubElement(prog, "Expressions")
         for ex in self._expressions:
