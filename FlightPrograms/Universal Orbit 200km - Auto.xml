@@ -22,6 +22,7 @@
     <Variable name="PitchTarget" number="90" />
     <Variable name="ApoapsisError" number="0" />
     <Variable name="PeriapsisError" number="0" />
+    <Variable name="SafeOrbitAltitude" number="0" />
     <Variable name="ThrottleCommand" number="1" />
     <Variable name="LastStageTime" number="-10" />
     <Variable name="ApoapsisRadius" number="0" />
@@ -150,6 +151,19 @@
       </Conditional>
     </SetVariable>
     <SetVariable id="36" style="set-variable">
+      <Variable list="false" local="false" variableName="SafeOrbitAltitude" />
+      <BinaryOp op="max" style="op-max">
+        <Constant number="10000" />
+        <BinaryOp op="min" style="op-min">
+          <BinaryOp op="+" style="op-add">
+            <Variable list="false" local="false" variableName="AtmosphereHeight" />
+            <Constant number="15000" />
+          </BinaryOp>
+          <Constant number="120000" />
+        </BinaryOp>
+      </BinaryOp>
+    </SetVariable>
+    <SetVariable id="37" style="set-variable">
       <Variable list="false" local="false" variableName="TargetHeading" />
       <Conditional style="conditional">
         <Comparison op="ge" style="op-gte">
@@ -162,14 +176,14 @@
         <Constant number="270" />
       </Conditional>
     </SetVariable>
-    <SetVariable id="37" style="set-variable">
+    <SetVariable id="38" style="set-variable">
       <Variable list="false" local="false" variableName="TargetRadius" />
       <BinaryOp op="+" style="op-add">
         <Variable list="false" local="false" variableName="PlanetRadius" />
         <Variable list="false" local="false" variableName="TargetAltitude" />
       </BinaryOp>
     </SetVariable>
-    <DisplayMessage id="38" style="display">
+    <DisplayMessage id="39" style="display">
       <StringOp op="format" style="format">
         <Constant text="Auto-orbit initialized. Target orbit: {0:n0} km. Countdown started." />
         <BinaryOp op="/" style="op-div">
@@ -179,83 +193,83 @@
       </StringOp>
       <Constant number="5" />
     </DisplayMessage>
-    <DisplayMessage id="39" style="display">
+    <DisplayMessage id="40" style="display">
       <StringOp op="format" style="format">
         <Constant text="Launch in {0:n0}" />
         <Constant number="5" />
       </StringOp>
       <Constant number="1" />
     </DisplayMessage>
-    <WaitSeconds id="40" style="wait-seconds">
+    <WaitSeconds id="41" style="wait-seconds">
       <Constant number="1" />
     </WaitSeconds>
-    <DisplayMessage id="41" style="display">
+    <DisplayMessage id="42" style="display">
       <StringOp op="format" style="format">
         <Constant text="Launch in {0:n0}" />
         <Constant number="4" />
       </StringOp>
       <Constant number="1" />
     </DisplayMessage>
-    <WaitSeconds id="42" style="wait-seconds">
+    <WaitSeconds id="43" style="wait-seconds">
       <Constant number="1" />
     </WaitSeconds>
-    <DisplayMessage id="43" style="display">
+    <DisplayMessage id="44" style="display">
       <StringOp op="format" style="format">
         <Constant text="Launch in {0:n0}" />
         <Constant number="3" />
       </StringOp>
       <Constant number="1" />
     </DisplayMessage>
-    <WaitSeconds id="44" style="wait-seconds">
+    <WaitSeconds id="45" style="wait-seconds">
       <Constant number="1" />
     </WaitSeconds>
-    <DisplayMessage id="45" style="display">
+    <DisplayMessage id="46" style="display">
       <StringOp op="format" style="format">
         <Constant text="Launch in {0:n0}" />
         <Constant number="2" />
       </StringOp>
       <Constant number="1" />
     </DisplayMessage>
-    <WaitSeconds id="46" style="wait-seconds">
+    <WaitSeconds id="47" style="wait-seconds">
       <Constant number="1" />
     </WaitSeconds>
-    <DisplayMessage id="47" style="display">
+    <DisplayMessage id="48" style="display">
       <StringOp op="format" style="format">
         <Constant text="Launch in {0:n0}" />
         <Constant number="1" />
       </StringOp>
       <Constant number="1" />
     </DisplayMessage>
-    <WaitSeconds id="48" style="wait-seconds">
+    <WaitSeconds id="49" style="wait-seconds">
       <Constant number="1" />
     </WaitSeconds>
-    <SetTargetHeading property="pitch" id="49" style="set-heading">
+    <SetTargetHeading property="pitch" id="50" style="set-heading">
       <Constant number="90" />
     </SetTargetHeading>
-    <SetTargetHeading property="heading" id="50" style="set-heading">
+    <SetTargetHeading property="heading" id="51" style="set-heading">
       <Variable list="false" local="false" variableName="TargetHeading" />
     </SetTargetHeading>
-    <SetInput input="throttle" id="51" style="set-input">
+    <SetInput input="throttle" id="52" style="set-input">
       <Constant number="1" />
     </SetInput>
-    <ActivateStage id="52" style="activate-stage" />
-    <SetVariable id="53" style="set-variable">
+    <ActivateStage id="53" style="activate-stage" />
+    <SetVariable id="54" style="set-variable">
       <Variable list="false" local="false" variableName="LastStageTime" />
       <CraftProperty property="Time.TimeSinceLaunch" style="prop-time" />
     </SetVariable>
-    <WaitSeconds id="54" style="wait-seconds">
+    <WaitSeconds id="55" style="wait-seconds">
       <Constant number="0.5" />
     </WaitSeconds>
-    <CallCustomInstruction call="Update Orbit State" id="55" style="call-custom-instruction" />
-    <While id="56" style="while">
+    <CallCustomInstruction call="Update Orbit State" id="56" style="call-custom-instruction" />
+    <While id="57" style="while">
       <Comparison op="g" style="op-gt">
         <Variable list="false" local="false" variableName="ApoapsisError" />
         <Variable list="false" local="false" variableName="TargetAltitudeTolerance" />
       </Comparison>
       <Instructions>
-        <CallCustomInstruction call="Update Orbit State" id="57" style="call-custom-instruction" />
-        <CallCustomInstruction call="Auto Stage" id="58" style="call-custom-instruction" />
-        <SetVariable id="59" style="set-variable">
+        <CallCustomInstruction call="Update Orbit State" id="58" style="call-custom-instruction" />
+        <CallCustomInstruction call="Auto Stage" id="59" style="call-custom-instruction" />
+        <SetVariable id="60" style="set-variable">
           <Variable list="false" local="false" variableName="TurnProgress" />
           <Conditional style="conditional">
             <Comparison op="l" style="op-lt">
@@ -348,7 +362,7 @@
             </Conditional>
           </Conditional>
         </SetVariable>
-        <SetVariable id="60" style="set-variable">
+        <SetVariable id="61" style="set-variable">
           <Variable list="false" local="false" variableName="PitchTarget" />
           <BinaryOp op="max" style="op-max">
             <Constant number="8" />
@@ -361,7 +375,7 @@
             </BinaryOp>
           </BinaryOp>
         </SetVariable>
-        <If id="61" style="if">
+        <If id="62" style="if">
           <BoolOp op="and" style="op-and">
             <Comparison op="l" style="op-lt">
               <Variable list="false" local="false" variableName="CurrentVerticalVelocity" />
@@ -376,7 +390,7 @@
             </Comparison>
           </BoolOp>
           <Instructions>
-            <SetVariable id="62" style="set-variable">
+            <SetVariable id="63" style="set-variable">
               <Variable list="false" local="false" variableName="PitchTarget" />
               <BinaryOp op="max" style="op-max">
                 <Variable list="false" local="false" variableName="PitchTarget" />
@@ -385,13 +399,13 @@
             </SetVariable>
           </Instructions>
         </If>
-        <SetTargetHeading property="heading" id="63" style="set-heading">
+        <SetTargetHeading property="heading" id="64" style="set-heading">
           <Variable list="false" local="false" variableName="TargetHeading" />
         </SetTargetHeading>
-        <SetTargetHeading property="pitch" id="64" style="set-heading">
+        <SetTargetHeading property="pitch" id="65" style="set-heading">
           <Variable list="false" local="false" variableName="PitchTarget" />
         </SetTargetHeading>
-        <SetVariable id="65" style="set-variable">
+        <SetVariable id="66" style="set-variable">
           <Variable list="false" local="false" variableName="ThrottleCommand" />
           <Conditional style="conditional">
             <Comparison op="g" style="op-gt">
@@ -423,52 +437,62 @@
             </Conditional>
           </Conditional>
         </SetVariable>
-        <SetInput input="throttle" id="66" style="set-input">
+        <SetInput input="throttle" id="67" style="set-input">
           <Variable list="false" local="false" variableName="ThrottleCommand" />
         </SetInput>
-        <WaitSeconds id="67" style="wait-seconds">
+        <WaitSeconds id="68" style="wait-seconds">
           <Constant number="0.1" />
         </WaitSeconds>
       </Instructions>
     </While>
-    <SetInput input="throttle" id="68" style="set-input">
+    <SetInput input="throttle" id="69" style="set-input">
       <Constant number="0" />
     </SetInput>
-    <CallCustomInstruction call="Update Orbit State" id="69" style="call-custom-instruction" />
-    <DisplayMessage id="70" style="display">
-      <Constant text="Apoapsis target reached. Coasting to circularization point." />
+    <CallCustomInstruction call="Update Orbit State" id="70" style="call-custom-instruction" />
+    <DisplayMessage id="71" style="display">
+      <StringOp op="format" style="format">
+        <Constant text="Apoapsis target reached. Coasting. Stable orbit threshold {0:n0} km." />
+        <BinaryOp op="/" style="op-div">
+          <Variable list="false" local="false" variableName="SafeOrbitAltitude" />
+          <Constant number="1000" />
+        </BinaryOp>
+      </StringOp>
       <Constant number="4" />
     </DisplayMessage>
-    <While id="71" style="while">
+    <While id="72" style="while">
       <Comparison op="g" style="op-gt">
         <CraftProperty property="Orbit.TimeToApoapsis" style="prop-orbit" />
         <Variable list="false" local="false" variableName="BurnLeadTime" />
       </Comparison>
       <Instructions>
-        <CallCustomInstruction call="Update Orbit State" id="72" style="call-custom-instruction" />
-        <LockNavSphere indicatorType="Prograde" id="73" style="lock-nav-sphere" />
-        <WaitSeconds id="74" style="wait-seconds">
+        <CallCustomInstruction call="Update Orbit State" id="73" style="call-custom-instruction" />
+        <LockNavSphere indicatorType="Prograde" id="74" style="lock-nav-sphere" />
+        <WaitSeconds id="75" style="wait-seconds">
           <Constant number="0.1" />
         </WaitSeconds>
       </Instructions>
     </While>
-    <DisplayMessage id="75" style="display">
+    <DisplayMessage id="76" style="display">
       <StringOp op="format" style="format">
-        <Constant text="Circularizing. Estimated dV: {0:n0} m/s" />
-        <Variable list="false" local="false" variableName="CircularizeDeltaV" />
+        <Constant text="Circularizing. Burn lead {0:n0} s, safe orbit above {1:n0} km." />
+        <Variable list="false" local="false" variableName="BurnLeadTime" />
+        <BinaryOp op="/" style="op-div">
+          <Variable list="false" local="false" variableName="SafeOrbitAltitude" />
+          <Constant number="1000" />
+        </BinaryOp>
       </StringOp>
       <Constant number="4" />
     </DisplayMessage>
-    <While id="76" style="while">
-      <Comparison op="g" style="op-gt">
-        <Variable list="false" local="false" variableName="PeriapsisError" />
-        <Variable list="false" local="false" variableName="TargetAltitudeTolerance" />
+    <While id="77" style="while">
+      <Comparison op="l" style="op-lt">
+        <Variable list="false" local="false" variableName="CurrentPeriapsis" />
+        <Variable list="false" local="false" variableName="SafeOrbitAltitude" />
       </Comparison>
       <Instructions>
-        <CallCustomInstruction call="Update Orbit State" id="77" style="call-custom-instruction" />
-        <CallCustomInstruction call="Auto Stage" id="78" style="call-custom-instruction" />
-        <LockNavSphere indicatorType="Prograde" id="79" style="lock-nav-sphere" />
-        <SetVariable id="80" style="set-variable">
+        <CallCustomInstruction call="Update Orbit State" id="78" style="call-custom-instruction" />
+        <CallCustomInstruction call="Auto Stage" id="79" style="call-custom-instruction" />
+        <LockNavSphere indicatorType="Prograde" id="80" style="lock-nav-sphere" />
+        <SetVariable id="81" style="set-variable">
           <Variable list="false" local="false" variableName="CircularVelocity" />
           <MathFunction function="sqrt" style="op-math">
             <Conditional style="conditional">
@@ -490,7 +514,7 @@
             </Conditional>
           </MathFunction>
         </SetVariable>
-        <SetVariable id="81" style="set-variable">
+        <SetVariable id="82" style="set-variable">
           <Variable list="false" local="false" variableName="CircularizeDeltaV" />
           <BinaryOp op="max" style="op-max">
             <Constant number="0" />
@@ -500,78 +524,84 @@
             </BinaryOp>
           </BinaryOp>
         </SetVariable>
-        <SetVariable id="82" style="set-variable">
+        <SetVariable id="83" style="set-variable">
           <Variable list="false" local="false" variableName="ThrottleCommand" />
           <Conditional style="conditional">
-            <BoolOp op="or" style="op-or">
-              <Comparison op="g" style="op-gt">
-                <Variable list="false" local="false" variableName="PeriapsisError" />
-                <Constant number="100000" />
-              </Comparison>
-              <Comparison op="g" style="op-gt">
-                <Variable list="false" local="false" variableName="CircularizeDeltaV" />
-                <Constant number="150" />
-              </Comparison>
-            </BoolOp>
-            <Constant number="1" />
+            <Comparison op="l" style="op-lt">
+              <Variable list="false" local="false" variableName="CurrentPeriapsis" />
+              <BinaryOp op="-" style="op-sub">
+                <Variable list="false" local="false" variableName="SafeOrbitAltitude" />
+                <Constant number="40000" />
+              </BinaryOp>
+            </Comparison>
+            <Constant number="0.7" />
             <Conditional style="conditional">
-              <BoolOp op="or" style="op-or">
-                <Comparison op="g" style="op-gt">
-                  <Variable list="false" local="false" variableName="PeriapsisError" />
-                  <Constant number="30000" />
-                </Comparison>
-                <Comparison op="g" style="op-gt">
-                  <Variable list="false" local="false" variableName="CircularizeDeltaV" />
-                  <Constant number="60" />
-                </Comparison>
-              </BoolOp>
-              <Constant number="0.5" />
+              <Comparison op="l" style="op-lt">
+                <Variable list="false" local="false" variableName="CurrentPeriapsis" />
+                <BinaryOp op="-" style="op-sub">
+                  <Variable list="false" local="false" variableName="SafeOrbitAltitude" />
+                  <Constant number="10000" />
+                </BinaryOp>
+              </Comparison>
+              <Constant number="0.35" />
               <Conditional style="conditional">
-                <BoolOp op="or" style="op-or">
-                  <Comparison op="g" style="op-gt">
-                    <Variable list="false" local="false" variableName="PeriapsisError" />
-                    <Constant number="5000" />
-                  </Comparison>
-                  <Comparison op="g" style="op-gt">
-                    <Variable list="false" local="false" variableName="CircularizeDeltaV" />
-                    <Constant number="20" />
-                  </Comparison>
-                </BoolOp>
-                <Constant number="0.2" />
+                <Comparison op="l" style="op-lt">
+                  <Variable list="false" local="false" variableName="CurrentPeriapsis" />
+                  <BinaryOp op="-" style="op-sub">
+                    <Variable list="false" local="false" variableName="SafeOrbitAltitude" />
+                    <Constant number="2000" />
+                  </BinaryOp>
+                </Comparison>
+                <Constant number="0.15" />
                 <Conditional style="conditional">
-                  <BoolOp op="or" style="op-or">
-                    <Comparison op="g" style="op-gt">
-                      <Variable list="false" local="false" variableName="PeriapsisError" />
-                      <Constant number="1000" />
-                    </Comparison>
-                    <Comparison op="g" style="op-gt">
-                      <Variable list="false" local="false" variableName="CircularizeDeltaV" />
-                      <Constant number="5" />
-                    </Comparison>
-                  </BoolOp>
-                  <Constant number="0.08" />
-                  <Constant number="0.03" />
+                  <Comparison op="l" style="op-lt">
+                    <Variable list="false" local="false" variableName="CurrentPeriapsis" />
+                    <Variable list="false" local="false" variableName="SafeOrbitAltitude" />
+                  </Comparison>
+                  <Constant number="0.06" />
+                  <Constant number="0" />
                 </Conditional>
               </Conditional>
             </Conditional>
           </Conditional>
         </SetVariable>
-        <SetInput input="throttle" id="83" style="set-input">
+        <SetInput input="throttle" id="84" style="set-input">
           <Variable list="false" local="false" variableName="ThrottleCommand" />
         </SetInput>
-        <WaitSeconds id="84" style="wait-seconds">
+        <WaitSeconds id="85" style="wait-seconds">
           <Constant number="0.1" />
         </WaitSeconds>
       </Instructions>
     </While>
-    <SetInput input="throttle" id="85" style="set-input">
+    <SetInput input="throttle" id="86" style="set-input">
       <Constant number="0" />
     </SetInput>
-    <LockNavSphere indicatorType="Prograde" id="86" style="lock-nav-sphere" />
-    <CallCustomInstruction call="Update Orbit State" id="87" style="call-custom-instruction" />
-    <DisplayMessage id="88" style="display">
+    <LockNavSphere indicatorType="Prograde" id="87" style="lock-nav-sphere" />
+    <CallCustomInstruction call="Update Orbit State" id="88" style="call-custom-instruction" />
+    <If id="89" style="if">
+      <BoolOp op="and" style="op-and">
+        <Comparison op="ge" style="op-gte">
+          <Variable list="false" local="false" variableName="CurrentPeriapsis" />
+          <Variable list="false" local="false" variableName="SafeOrbitAltitude" />
+        </Comparison>
+        <Comparison op="l" style="op-lt">
+          <Variable list="false" local="false" variableName="CurrentPeriapsis" />
+          <BinaryOp op="-" style="op-sub">
+            <Variable list="false" local="false" variableName="TargetAltitude" />
+            <Constant number="5000" />
+          </BinaryOp>
+        </Comparison>
+      </BoolOp>
+      <Instructions>
+        <DisplayMessage id="90" style="display">
+          <Constant text="Stable orbit achieved. Exact 200 km correction skipped to avoid overburn." />
+          <Constant number="4" />
+        </DisplayMessage>
+      </Instructions>
+    </If>
+    <DisplayMessage id="91" style="display">
       <StringOp op="format" style="format">
-        <Constant text="Orbit achieved. Apoapsis {0:n1} km, Periapsis {1:n1} km" />
+        <Constant text="Stable orbit achieved. Apoapsis {0:n1} km, Periapsis {1:n1} km" />
         <BinaryOp op="/" style="op-div">
           <Variable list="false" local="false" variableName="CurrentApoapsis" />
           <Constant number="1000" />
@@ -583,7 +613,7 @@
       </StringOp>
       <Constant number="10" />
     </DisplayMessage>
-    <LogFlight id="89" style="flightlog">
+    <LogFlight id="92" style="flightlog">
       <StringOp op="format" style="format">
         <Constant text="Universal 200 km orbit complete. Apoapsis {0:n1} km, Periapsis {1:n1} km." />
         <BinaryOp op="/" style="op-div">
@@ -859,13 +889,30 @@
     </SetVariable>
     <SetVariable id="21" style="set-variable">
       <Variable list="false" local="false" variableName="BurnLeadTime" />
-      <BinaryOp op="max" style="op-max">
-        <Constant number="3" />
-        <BinaryOp op="/" style="op-div">
-          <Variable list="false" local="false" variableName="CircularizeBurnTime" />
-          <Constant number="2" />
-        </BinaryOp>
-      </BinaryOp>
+      <Conditional style="conditional">
+        <Comparison op="l" style="op-lt">
+          <BinaryOp op="/" style="op-div">
+            <Variable list="false" local="false" variableName="CircularizeBurnTime" />
+            <Constant number="2" />
+          </BinaryOp>
+        <Constant number="5" />
+        </Comparison>
+        <Constant number="5" />
+        <Conditional style="conditional">
+          <Comparison op="g" style="op-gt">
+            <BinaryOp op="/" style="op-div">
+            <Variable list="false" local="false" variableName="CircularizeBurnTime" />
+            <Constant number="2" />
+          </BinaryOp>
+        <Constant number="25" />
+          </Comparison>
+          <Constant number="25" />
+          <BinaryOp op="/" style="op-div">
+            <Variable list="false" local="false" variableName="CircularizeBurnTime" />
+            <Constant number="2" />
+          </BinaryOp>
+        </Conditional>
+      </Conditional>
     </SetVariable>
     <SetVariable id="22" style="set-variable">
       <Variable list="false" local="false" variableName="ApoapsisError" />

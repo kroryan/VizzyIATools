@@ -1,3 +1,12 @@
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+
 from vizzy_tool import E, PROGRAMS_DIR, VizzyProgram, validate_program
 
 
@@ -25,6 +34,10 @@ def clamp(expr, low, high):
 
 def maximum(a, b):
     return E.max2(a, b)
+
+
+def minimum(a, b):
+    return E.min2(a, b)
 
 
 def ratio(num_expr, den_expr, fallback=0):
@@ -61,6 +74,7 @@ def build_program():
         ("PitchTarget", 90),
         ("ApoapsisError", 0),
         ("PeriapsisError", 0),
+        ("SafeOrbitAltitude", 0),
         ("ThrottleCommand", 1),
         ("LastStageTime", -10),
         ("ApoapsisRadius", 0),
@@ -174,7 +188,7 @@ def build_program():
         ),
         prog.set_var(
             "BurnLeadTime",
-            maximum(n(3), E.div(v("CircularizeBurnTime"), n(2))),
+            clamp(E.div(v("CircularizeBurnTime"), n(2)), 5, 25),
         ),
         prog.set_var("ApoapsisError", E.sub(v("TargetAltitude"), v("CurrentApoapsis"))),
         prog.set_var("PeriapsisError", E.sub(v("TargetAltitude"), v("CurrentPeriapsis"))),
@@ -205,6 +219,18 @@ def build_program():
                 E.add(E.mul(v("TargetAltitude"), n(0.45)), E.mul(v("AtmosphereHeight"), n(0.15))),
                 25_000,
                 90_000,
+            ),
+        )
+    )
+    instr.append(
+        prog.set_var(
+            "SafeOrbitAltitude",
+            maximum(
+                n(10_000),
+                minimum(
+                    E.add(v("AtmosphereHeight"), n(15_000)),
+                    n(120_000),
+                ),
             ),
         )
     )
@@ -316,7 +342,10 @@ def build_program():
     instr.append(prog.call_instruction("Update Orbit State"))
     instr.append(
         prog.display(
-            E.text("Apoapsis target reached. Coasting to circularization point."),
+            E.format(
+                E.text("Apoapsis target reached. Coasting. Stable orbit threshold {0:n0} km."),
+                E.div(v("SafeOrbitAltitude"), n(1000)),
+            ),
             duration=4,
         )
     )
@@ -331,14 +360,15 @@ def build_program():
     instr.append(
         prog.display(
             E.format(
-                E.text("Circularizing. Estimated dV: {0:n0} m/s"),
-                v("CircularizeDeltaV"),
+                E.text("Circularizing. Burn lead {0:n0} s, safe orbit above {1:n0} km."),
+                v("BurnLeadTime"),
+                E.div(v("SafeOrbitAltitude"), n(1000)),
             ),
             duration=4,
         )
     )
 
-    circularize = prog.while_loop(E.gt(v("PeriapsisError"), v("TargetAltitudeTolerance")))
+    circularize = prog.while_loop(E.lt(v("CurrentPeriapsis"), v("SafeOrbitAltitude")))
     circ_body = circularize.find("Instructions")
     circ_body.append(prog.call_instruction("Update Orbit State"))
     circ_body.append(prog.call_instruction("Auto Stage"))
@@ -362,18 +392,18 @@ def build_program():
         prog.set_var(
             "ThrottleCommand",
             E.cond(
-                E.or_(E.gt(v("PeriapsisError"), n(100_000)), E.gt(v("CircularizeDeltaV"), n(150))),
-                n(1),
+                E.lt(v("CurrentPeriapsis"), E.sub(v("SafeOrbitAltitude"), n(40_000))),
+                n(0.7),
                 E.cond(
-                    E.or_(E.gt(v("PeriapsisError"), n(30_000)), E.gt(v("CircularizeDeltaV"), n(60))),
-                    n(0.5),
+                    E.lt(v("CurrentPeriapsis"), E.sub(v("SafeOrbitAltitude"), n(10_000))),
+                    n(0.35),
                     E.cond(
-                        E.or_(E.gt(v("PeriapsisError"), n(5_000)), E.gt(v("CircularizeDeltaV"), n(20))),
-                        n(0.2),
+                        E.lt(v("CurrentPeriapsis"), E.sub(v("SafeOrbitAltitude"), n(2_000))),
+                        n(0.15),
                         E.cond(
-                            E.or_(E.gt(v("PeriapsisError"), n(1_000)), E.gt(v("CircularizeDeltaV"), n(5))),
-                            n(0.08),
-                            n(0.03),
+                            E.lt(v("CurrentPeriapsis"), v("SafeOrbitAltitude")),
+                            n(0.06),
+                            n(0),
                         ),
                     ),
                 ),
@@ -387,10 +417,23 @@ def build_program():
     instr.append(prog.set_input("throttle", n(0)))
     instr.append(prog.lock_heading("Prograde"))
     instr.append(prog.call_instruction("Update Orbit State"))
+    refine = prog.if_block(
+        E.and_(
+            E.gte(v("CurrentPeriapsis"), v("SafeOrbitAltitude")),
+            E.lt(v("CurrentPeriapsis"), E.sub(v("TargetAltitude"), n(5_000))),
+        )
+    )
+    refine.find("Instructions").append(
+        prog.display(
+            E.text("Stable orbit achieved. Exact 200 km correction skipped to avoid overburn."),
+            duration=4,
+        )
+    )
+    instr.append(refine)
     instr.append(
         prog.display(
             E.format(
-                E.text("Orbit achieved. Apoapsis {0:n1} km, Periapsis {1:n1} km"),
+                E.text("Stable orbit achieved. Apoapsis {0:n1} km, Periapsis {1:n1} km"),
                 E.div(v("CurrentApoapsis"), n(1000)),
                 E.div(v("CurrentPeriapsis"), n(1000)),
             ),

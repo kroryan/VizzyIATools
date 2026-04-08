@@ -298,7 +298,13 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 _HERE = Path(__file__).resolve().parent
-if (_HERE / "FlightPrograms").exists() and (_HERE / "CraftDesigns").exists():
+
+# Prefer the repository-local layout when present:
+#   VizzyIATools/
+#     FlightPrograms/
+#     Example/Craft/
+# This keeps generators and readers working after the project reorganization.
+if (_HERE / "FlightPrograms").exists():
     USERDATA = _HERE
 elif (_HERE.parent / "FlightPrograms").exists() and (_HERE.parent / "CraftDesigns").exists():
     USERDATA = _HERE.parent
@@ -306,7 +312,12 @@ else:
     USERDATA = _HERE
 
 PROGRAMS_DIR = USERDATA / "FlightPrograms"
-CRAFTS_DIR   = USERDATA / "CraftDesigns"
+if (USERDATA / "CraftDesigns").exists():
+    CRAFTS_DIR = USERDATA / "CraftDesigns"
+elif (USERDATA / "Example" / "Craft").exists():
+    CRAFTS_DIR = USERDATA / "Example" / "Craft"
+else:
+    CRAFTS_DIR = USERDATA / "CraftDesigns"
 
 
 # ============================================================
@@ -942,7 +953,9 @@ class VizzyProgram:
         return el
 
     def else_block(self) -> ET.Element:
-        el = self._instr("Else", "else")
+        el = self._instr("ElseIf", "else")
+        c = ET.SubElement(el, "Constant")
+        c.set("bool", "true")
         ET.SubElement(el, "Instructions")
         return el
 
