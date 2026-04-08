@@ -1,210 +1,209 @@
-# Analisis del proyecto y del generador Vizzy
+# Project and Vizzy Generator Analysis
 
-## 1. Estructura real del proyecto
+## 1. Actual project structure
 
-El repositorio es pequeno y esta centrado en una sola herramienta:
+The repository is small and centered around a single tool:
 
-- `vizzy_tool.py`: libreria principal y CLI.
-- `README.md`: documentacion funcional y advertencias de compatibilidad.
-- `Example/Vizzy/Universal Vizzy Mission 2 - Enhanced.xml`: ejemplo grande con mecanicas orbitales avanzadas.
-- `Example/Craft/USP-01 Universal Space Probe AI Improved.xml`: craft con Vizzy embebido.
+- `vizzy_tool.py`: main library and CLI.
+- `README.md`: functional documentation and compatibility warnings.
+- `Example/Vizzy/Universal Vizzy Mission 2 - Enhanced.xml`: large example with advanced orbital mechanics.
+- `Example/Craft/USP-01 Universal Space Probe AI Improved.xml`: craft with embedded Vizzy.
 
-No hay dependencias externas. Todo se basa en `xml.etree.ElementTree` y en escritura de XML compatible con Juno: New Origins.
+There are no external dependencies. Everything is based on `xml.etree.ElementTree` and XML writing compatible with Juno: New Origins.
 
-## 2. Que hace realmente `vizzy_tool.py`
+## 2. What `vizzy_tool.py` actually does
 
-La herramienta mezcla tres roles:
+The tool combines three roles:
 
 1. Builder:
-   construye programas Vizzy desde Python con la clase `VizzyProgram`.
-2. DSL de expresiones:
-   la clase `E` fabrica nodos XML para constantes, variables, operadores, propiedades de craft, propiedades planetarias y vectores.
-3. Utilidades:
-   lectura, listado, validacion y extraccion de programas embebidos en crafts.
+   builds Vizzy programs from Python through the `VizzyProgram` class.
+2. Expression DSL:
+   the `E` class creates XML nodes for constants, variables, operators, craft properties, planetary properties, and vectors.
+3. Utilities:
+   reading, listing, validation, and extraction of programs embedded inside craft files.
 
 ### 2.1 Builder
 
-`VizzyProgram` encapsula:
+`VizzyProgram` encapsulates:
 
-- declaracion de variables con `var(...)`
-- eventos como `on_start()`
-- instrucciones de control (`while_loop`, `if_block`, `for_loop`)
-- control de nave (`set_input`, `set_pitch`, `set_heading`, `lock_heading`, `activate_stage`)
-- persistencia con `save()`
+- variable declaration with `var(...)`
+- events such as `on_start()`
+- control instructions (`while_loop`, `if_block`, `for_loop`)
+- craft control (`set_input`, `set_pitch`, `set_heading`, `lock_heading`, `activate_stage`)
+- persistence with `save()`
 
-El builder autogestiona:
+The builder automatically manages:
 
-- IDs de bloques
-- posiciones visuales del canvas
-- serializacion XML
+- block IDs
+- visual canvas positions
+- XML serialization
 
-### 2.2 DSL `E`
+### 2.2 `E` DSL
 
-`E` es el punto clave para generar Vizzy sin abrir el editor:
+`E` is the key piece that allows generating Vizzy without opening the editor:
 
-- constantes: `num`, `text`, `TRUE`, `FALSE`
+- constants: `num`, `text`, `TRUE`, `FALSE`
 - variables: `var`, `local_var`, `list_var`
-- propiedades: `prop`, `planet_prop`, `part_prop`, `craft_prop`
-- matematica: `add`, `sub`, `mul`, `div`, `pow`, `min2`, `max2`, `math`
-- logica: `eq`, `lt`, `gt`, `and_`, `or_`, `not_`, `cond`
-- vectores: `vec`, `vec1`, `vec2`
+- properties: `prop`, `planet_prop`, `part_prop`, `craft_prop`
+- math: `add`, `sub`, `mul`, `div`, `pow`, `min2`, `max2`, `math`
+- logic: `eq`, `lt`, `gt`, `and_`, `or_`, `not_`, `cond`
+- vectors: `vec`, `vec1`, `vec2`
 
-Esto permite construir programas autopilotados con formulas orbitales sin editar XML a mano.
+This makes it possible to build autopilot programs with orbital formulas without editing XML manually.
 
-### 2.3 Validacion
+### 2.3 Validation
 
-La validacion incorporada comprueba:
+The built-in validator checks:
 
-- XML bien formado
-- presencia de `Variables` e `Instructions`
-- ausencia de IDs duplicados
-- propiedades invalidas conocidas
+- well-formed XML
+- presence of `Variables` and `Instructions`
+- absence of duplicate IDs
+- known invalid properties
 
-Es importante porque Juno falla de forma bastante fragil con XML ligeramente incorrecto.
+This matters because Juno fails in a fairly fragile way when the XML is only slightly wrong.
 
-## 3. Reglas criticas de compatibilidad detectadas
+## 3. Critical compatibility rules detected
 
-Del `README.md` y del codigo salen varias restricciones importantes:
+From `README.md` and from the code, several important constraints emerge:
 
-- Los archivos deben escribirse con UTF-8 BOM (`utf-8-sig`).
-- Las propiedades planetarias no usan `CraftProperty style="planet"` sino nodos `<Planet op="...">`.
-- `Orbit.Planet` es la propiedad correcta para el nombre del planeta actual.
-- La estructura del programa debe incluir `Variables`, `Instructions` y normalmente `Expressions`.
+- Files must be written with UTF-8 BOM (`utf-8-sig`).
+- Planet properties do not use `CraftProperty style="planet"` but `<Planet op="...">` nodes.
+- `Orbit.Planet` is the correct property for the current planet name.
+- The program structure must include `Variables`, `Instructions`, and normally `Expressions`.
 
-Estas reglas son materialmente importantes. Un XML "casi correcto" puede cargar vacio o romper el programa en juego.
+These rules are materially important. An XML file that is "almost correct" can load empty or break the program in-game.
 
-## 4. Que aporta el ejemplo grande
+## 4. What the large example provides
 
-`Universal Vizzy Mission 2 - Enhanced.xml` demuestra que el formato generado por la herramienta soporta:
+`Universal Vizzy Mission 2 - Enhanced.xml` proves that the format generated by the tool supports:
 
-- instrucciones custom
-- solucion numerica tipo RK4
-- calculos de anomalia universal
-- heading/azimuth dinamico
-- transferencias, encuentros y logica orbital compleja
+- custom instructions
+- RK4-style numerical solving
+- universal anomaly calculations
+- dynamic heading and azimuth
+- transfers, encounters, and complex orbital logic
 
-Para la tarea pedida no conviene reutilizarlo entero porque:
+For the requested task, reusing it whole was not a good idea because:
 
-- es demasiado grande
-- mezcla navegacion interplanetaria con lanzamiento
-- aumenta mucho la superficie de error
+- it is too large
+- it mixes interplanetary navigation with launch
+- it greatly increases the error surface
 
-Lo util del ejemplo para esta tarea es confirmar que el juego y el builder soportan:
+What is actually useful from that example for this task is confirming that the game and the builder support:
 
-- calculo de rotacion planetaria con `Planet day`
-- guiado por `SetTargetHeading`
-- uso intensivo de `Orbit.Apoapsis`, `Orbit.Periapsis`, `Vel.OrbitVelocity`
-- custom instructions para encapsular logica
+- planetary rotation calculations with `Planet day`
+- guidance through `SetTargetHeading`
+- heavy use of `Orbit.Apoapsis`, `Orbit.Periapsis`, and `Vel.OrbitVelocity`
+- custom instructions to encapsulate logic
 
-## 5. Diseno del autopiloto 200 km
+## 5. 200 km autopilot design
 
-Se ha generado un programa nuevo y mas corto en `generate_universal_200km_orbit.py`.
+A new and shorter program was generated in `generate_universal_200km_orbit.py`.
 
-Objetivo del programa:
+Program goal:
 
-- cuenta atras de 5 segundos
-- despegue automatico
-- ascenso orbital progrado
-- objetivo de apoapsis 200 km
-- costa hasta apoapsis
-- circularizacion hasta periapsis 200 km
+- 5-second countdown
+- automatic liftoff
+- prograde orbital ascent
+- 200 km apoapsis target
+- coast to apoapsis
+- circularization to 200 km periapsis
 
-### 5.1 Filosofia
+### 5.1 Philosophy
 
-En vez de intentar modelar todo el lanzamiento con un solver complejo, el nuevo Vizzy usa un enfoque mas robusto para "muchos cohetes":
+Instead of trying to model the entire ascent with a complex solver, the new Vizzy uses a more robust approach for "many rockets":
 
-- gravity turn por progresion de altura
-- control de throttle segun error de apoapsis
-- autostaging basico
-- circularizacion cerrando el error de periapsis
+- gravity turn driven by altitude progression
+- throttle control based on apoapsis error
+- basic autostaging
+- circularization by closing periapsis error
 
-Esto no garantiza exito matematico para cualquier vehiculo imposible, pero si es una estrategia razonable y portable para cohetes con:
+This does not mathematically guarantee success for every impossible vehicle, but it is a reasonable and portable strategy for rockets with:
 
-- TWR inicial suficiente para despegar
-- delta-v suficiente para orbitar
-- staging convencional
+- enough initial TWR to launch
+- enough delta-v to orbit
+- conventional staging
 
-## 6. Calculos fisicos usados
+## 6. Physics calculations used
 
-### 6.1 Parametro gravitacional
+### 6.1 Gravitational parameter
 
-Se calcula:
+It calculates:
 
 `mu = G * M`
 
-donde:
+where:
 
 - `G = 6.67430e-11`
 - `M = planet.mass`
 
-### 6.2 Velocidad circular
+### 6.2 Circular velocity
 
-Para un radio orbital `r`:
+For an orbital radius `r`:
 
 `v_circular = sqrt(mu / r)`
 
-Se usa:
+It is used:
 
-- durante la preparacion de la circularizacion
-- durante el quemado final para comparar con la velocidad orbital actual
+- when preparing circularization
+- during the final burn to compare against current orbital velocity
 
-### 6.3 Velocidad requerida en apoapsis para circularizar
+### 6.3 Velocity required at apoapsis to circularize
 
-Partiendo de apoapsis `ra` y periapsis `rp`:
+Starting from apoapsis `ra` and periapsis `rp`:
 
 - `a = (ra + rp) / 2`
 - `v_apo = sqrt(mu * (2/ra - 1/a))`
 - `dv_circularize = sqrt(mu / ra) - v_apo`
 
-Esto permite estimar el delta-v de la maniobra final.
+This allows estimating the delta-v of the final maneuver.
 
-### 6.4 Tiempo de inicio del quemado de circularizacion
+### 6.4 Circularization burn start time
 
-El tiempo se estima de forma pragmatica:
+The time is estimated pragmatically:
 
 `burn_time_est = BurnTime * clamp(dv / StageDeltaV, 0, 1)`
 
-y luego:
+and then:
 
 `burn_lead = max(3, burn_time_est / 2)`
 
-No es una solucion exacta tipo ecuacion del cohete, pero usa propiedades confirmadas disponibles en Vizzy y evita depender de funciones no documentadas del evaluador inline.
+This is not an exact rocket-equation solution, but it uses confirmed properties available in Vizzy and avoids depending on undocumented inline evaluator functions.
 
-## 7. Como se adapta a distintos cohetes
+## 7. How it adapts to different rockets
 
-La universalidad buscada viene de tres decisiones:
+The intended universality comes from three decisions:
 
-1. Los parametros del planeta se leen en runtime:
-   radio, masa, altura de atmosfera y sentido de rotacion.
-2. El gravity turn es dinamico:
-   `TurnStart` y `TurnEnd` dependen de atmosfera y objetivo orbital.
-3. El control de potencia no es fijo:
-   se modula por error de apoapsis y luego por error de periapsis/delta-v.
+1. Planet parameters are read at runtime:
+   radius, mass, atmosphere height, and rotation direction.
+2. The gravity turn is dynamic:
+   `TurnStart` and `TurnEnd` depend on the atmosphere and orbital target.
+3. Throttle control is not fixed:
+   it is modulated by apoapsis error and later by periapsis or delta-v error.
 
-Ademas:
+In addition:
 
-- el heading objetivo se pone a 90 o 270 segun el signo del dia planetario
-- el staging se intenta automaticamente cuando baja el thrust o se vacia el stage actual
+- heading is set to 90 or 270 depending on the sign of planetary day
+- staging is attempted automatically when thrust drops or the current stage empties
 
-## 8. Limites tecnicos honestos
+## 8. Honest technical limits
 
-Hay que dejar claro lo siguiente:
+The following needs to be stated clearly:
 
-- Ningun autopiloto puede ser literalmente universal para cualquier cohete si el vehiculo no tiene rendimiento suficiente.
-- Cohetes extremadamente inestables, con TWR marginal o staging exotico pueden necesitar ajustes.
-- La estimacion del tiempo de circularizacion es aproximada, aunque la correccion por error de periapsis cierra bien la maniobra final.
+- No autopilot can be literally universal for any rocket if the vehicle lacks enough performance.
+- Extremely unstable rockets, vehicles with marginal TWR, or exotic staging may need tuning.
+- The circularization time estimate is approximate, even though the periapsis-error correction closes the final maneuver reasonably well.
 
-## 9. Archivos generados para esta tarea
+## 9. Files generated for this task
 
-- `generate_universal_200km_orbit.py`: generador del nuevo programa.
-- `FlightPrograms/Universal Orbit 200km - Auto.xml`: XML Vizzy listo para cargar tras ejecutar el script.
+- `generate_universal_200km_orbit.py`: generator of the new program.
+- `FlightPrograms/Universal Orbit 200km - Auto.xml`: Vizzy XML ready to load after running the script.
 
-## 10. Flujo recomendado de uso
+## 10. Recommended usage flow
 
-1. Ejecutar:
+1. Run:
    `python generate_universal_200km_orbit.py`
-2. Validar:
+2. Validate:
    `python vizzy_tool.py validate "Universal Orbit 200km - Auto"`
-3. Cargar el programa en Juno.
-4. Probar primero con un cohete convencional de 2 o 3 etapas y TWR > 1.3.
-
+3. Load the program in Juno.
+4. Test first with a conventional 2-stage or 3-stage rocket and TWR > 1.3.
